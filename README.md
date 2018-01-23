@@ -1,2 +1,2 @@
 # composition-helper
-Tool to assist in musical composition
+This github repository is for a tool designed to assist in musical composition.
