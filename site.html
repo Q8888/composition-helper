@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Composition Helper</title>
+  <script src='https://d3js.org/d3.v4.min.js'></script>
+  <style>
+
+  </style>
+</head>
+
+<body>
+  Insert key (0-12, 0 = C): </br>
+  <input id="key" type="text"><br>
+
+  <input id="major" type="checkbox"> Major
+  <input id="minor" type="checkbox"> Minor
+  <input id="other" type="checkbox"> Other
+  </br>
+  </br>
+
+  Insert time signature (Top/Bottom): </br>
+  <input id="timeTop" type="text"><br>
+  <input id="timeBottom" type="text"><br>
+  <button id="getTime" type="button" onclick="getInfo()">
+  Collect Info
+  </button> </br>
+
+  <img id="timeImage" src="" style=""></img>
+</body>
+
+<script>
+  var timeSignatureTop;
+  var timeSignatureBottom;
+  var key;
+  var mode;
+  var chords;
+
+  class Chord {
+    constructor(chordDegree, inversion) {
+      this.height = height;
+      this.width = width;
+    }
+  }
+
+  function  getInfo(){
+    timeSignatureTop = document.getElementById('timeTop').value;
+    timeSignatureBottom = document.getElementById('timeBottom').value;
+    key = document.getElementById("key").value;
+
+    if( document.getElementById("major").checked == true ){
+      mode = "major";
+    } else if( document.getElementById("minor").checked == true ){
+      mode = "minor";
+    }
+    else{
+      mode = "other";
+    }
+
+    if(timeSignatureTop==4 && timeSignatureBottom==4){
+      document.getElementById("timeImage").src = "http://jonathankulp.org/images/4-4meter-original.png";
+      document.getElementById("timeImage").style = "width:30px;height:75px;";
+    }
+    console.log( timeSignatureTop + " " + timeSignatureBottom + " " + key + " " + mode );
+  }
+</script>
+
+</html>
