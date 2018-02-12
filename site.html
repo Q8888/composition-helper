@@ -6,7 +6,8 @@
   <title>Composition Helper</title>
   <script src='https://d3js.org/d3.v4.min.js'></script>
   <style>
-
+    .chordDiv{
+    }
   </style>
 </head>
 
@@ -27,27 +28,59 @@
   Collect Info
   </button> </br>
 
-  <img id="timeImage" src="" style=""></img>
+  <img id="timeImage" src="" style=""></img></br></br>
+
+  <div class="chordDiv">
+
+  </div>
 </body>
 
 <script>
+  console.log(window.innerWidth)
   var timeSignatureTop;
   var timeSignatureBottom;
   var key;
   var mode;
   var chords;
+  var notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+  var majorSteps = [ 0, 2, 4, 5, 7, 9, 11 ];
+  var minorSteps = [ 0, 2, 3, 5, 7, 8, 10 ]
+
+  var chordProgressionsMajor =
+    [[4, 3, 6, 2, 0, 5],
+     [4, 6],
+     [0, 4],
+     [1, 4, 0, 5],
+     [0, 5, 3],
+     [0, 4, 3],
+     [0, 5]];
 
   class Chord {
     constructor(chordDegree, inversion) {
-      this.height = height;
-      this.width = width;
+      this.chordDegree = chordDegree;
+      this.inversion = inversion;
+    }
+
+    suggestNextChord(){
+      if(mode == "major"){
+        return chordProgressionsMajor[this.chordDegree];
+      }
+    }
+
+    convertDegree(){
+      if(mode == "major"){
+        return notes[(key + majorSteps[this.chordDegree]) % 12];
+      }
+      else{
+        return notes[(key + minorSteps[this.chordDegree]) % 12];
+      }
     }
   }
 
   function  getInfo(){
-    timeSignatureTop = document.getElementById('timeTop').value;
-    timeSignatureBottom = document.getElementById('timeBottom').value;
-    key = document.getElementById("key").value;
+    timeSignatureTop = parseInt(document.getElementById('timeTop').value);
+    timeSignatureBottom = parseInt(document.getElementById('timeBottom').value);
+    key = parseInt(document.getElementById("key").value);
 
     if( document.getElementById("major").checked == true ){
       mode = "major";
@@ -62,7 +95,15 @@
       document.getElementById("timeImage").src = "http://jonathankulp.org/images/4-4meter-original.png";
       document.getElementById("timeImage").style = "width:30px;height:75px;";
     }
-    console.log( timeSignatureTop + " " + timeSignatureBottom + " " + key + " " + mode );
+    //console.log( timeSignatureTop + " " + timeSignatureBottom + " " + key + " " + mode );
+    box = document.getElementsByClassName("chordDiv")[0];
+    box.style.outline = "5px solid black";
+    box.style.height = (Math.floor(window.innerWidth / timeSignatureTop)).toString() + " px";
+    box.style.width = (Math.floor(window.innerWidth / timeSignatureTop)).toString() + " px";
+    console.log(timeSignatureTop)
+    console.log(window.innerWidth)
+    console.log(window.innerWidth / timeSignatureTop)
+
   }
 </script>
 
