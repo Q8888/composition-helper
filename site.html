@@ -6,8 +6,14 @@
   <title>Composition Helper</title>
   <script src='https://d3js.org/d3.v4.min.js'></script>
   <style>
-    .chordDiv{
-    }
+  /* #chordDiv{
+    width: 1024px;
+  } */
+  #chordDiv div{
+    display: inline-block;
+    margin-left: 10px;
+    border: 5px solid black;
+  }
   </style>
 </head>
 
@@ -15,9 +21,9 @@
   Insert key (0-12, 0 = C): </br>
   <input id="key" type="text"><br>
 
-  <input id="major" type="checkbox"> Major
-  <input id="minor" type="checkbox"> Minor
-  <input id="other" type="checkbox"> Other
+  <input id="major" name = "key" type="radio"> Major
+  <input id="minor" name = "key" type="radio"> Minor
+  <input id="other" name = "key" type="radio"> Other
   </br>
   </br>
 
@@ -30,13 +36,12 @@
 
   <img id="timeImage" src="" style=""></img></br></br>
 
-  <div class="chordDiv">
-
+  <div id="chordDiv">
   </div>
 </body>
 
 <script>
-  console.log(window.innerWidth)
+  // console.log(window.innerWidth)
   var timeSignatureTop;
   var timeSignatureBottom;
   var key;
@@ -95,14 +100,22 @@
       document.getElementById("timeImage").src = "http://jonathankulp.org/images/4-4meter-original.png";
       document.getElementById("timeImage").style = "width:30px;height:75px;";
     }
-    //console.log( timeSignatureTop + " " + timeSignatureBottom + " " + key + " " + mode );
-    box = document.getElementsByClassName("chordDiv")[0];
-    box.style.outline = "5px solid black";
-    box.style.height = (Math.floor(window.innerWidth / timeSignatureTop)).toString() + " px";
-    box.style.width = (Math.floor(window.innerWidth / timeSignatureTop)).toString() + " px";
-    console.log(timeSignatureTop)
-    console.log(window.innerWidth)
-    console.log(window.innerWidth / timeSignatureTop)
+    //console.log( timeSignatureTop + " " + timeSignatureBottom + " " + key + " " + mode )
+    var box = document.getElementById("chordDiv");
+    while(box.firstChild){
+      box.removeChild(box.firstChild);
+    }
+    for(var i=0; i < timeSignatureTop; i++){
+      var addedDiv = document.createElement('div')
+      box.appendChild(addedDiv);
+    }
+
+    var beats = document.querySelectorAll("#chordDiv div");
+    for(var i = 0; i < beats.length; i++){
+      var sideLength = (Math.floor((window.innerWidth-(timeSignatureTop+1)*20) / timeSignatureTop)).toString() + "px"
+      beats[i].style.width = sideLength;
+      beats[i].style.height = sideLength;
+    }
 
   }
 </script>
