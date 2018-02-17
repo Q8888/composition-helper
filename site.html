@@ -6,14 +6,24 @@
   <title>Composition Helper</title>
   <script src='https://d3js.org/d3.v4.min.js'></script>
   <style>
-  /* #chordDiv{
-    width: 1024px;
-  } */
   #chordDiv div{
     display: inline-block;
     margin-left: 10px;
     border: 5px solid black;
+    overflow: hidden;
+    text-align: center;
   }
+
+
+  .button {
+    background-color: #b5bfce;
+    border: none;
+    padding: 8px 130px;
+    text-align: center;
+    overflow: hidden;
+    vertical-align: middle;
+    margin-top: 2px;
+}
   </style>
 </head>
 
@@ -64,6 +74,7 @@
     constructor(chordDegree, inversion) {
       this.chordDegree = chordDegree;
       this.inversion = inversion;
+      this.chordText = convertToRomanNumeral(chordDegree, mode);
     }
 
     suggestNextChord(){
@@ -79,6 +90,20 @@
       else{
         return notes[(key + minorSteps[this.chordDegree]) % 12];
       }
+    }
+  }
+
+  function convertToRomanNumeral(chordDegree, mode){
+    var majorKeyChords = ["I", "ii", "iii", "IV", "V", "vi", "vii\xB0"];
+    var minorKeyChords = ["i", "ii\xB0", "III", "iv", "v", "VI", "VII"]
+    if(mode === 'major'){
+      return majorKeyChords[chordDegree];
+    }
+    else if(mode === 'minor'){
+      return minorKeyChords[chordDegree];
+    }
+    else{
+      return chordDegree+1; //Q: What should you do with the chord notation if Other is chosen?
     }
   }
 
@@ -100,7 +125,6 @@
       document.getElementById("timeImage").src = "http://jonathankulp.org/images/4-4meter-original.png";
       document.getElementById("timeImage").style = "width:30px;height:75px;";
     }
-    //console.log( timeSignatureTop + " " + timeSignatureBottom + " " + key + " " + mode )
     var box = document.getElementById("chordDiv");
     while(box.firstChild){
       box.removeChild(box.firstChild);
@@ -115,9 +139,51 @@
       var sideLength = (Math.floor((window.innerWidth-(timeSignatureTop+1)*20) / timeSignatureTop)).toString() + "px"
       beats[i].style.width = sideLength;
       beats[i].style.height = sideLength;
+      if(i != 0){
+        beats[i].classList.add('selections')
+      }
     }
 
+    createChordButtons(beats, 0, 0)
+    createChordButtons(beats, 1, 0);
+
+}
+
+function createChordButtons(beats, boxNum, chordDeg){
+  var chord;
+  if(boxNum === 0){
+    chord = new Chord(0,0);
+    var text = document.createElement('h1');
+    text.innerHTML = chord.chordText;
+    beats[boxNum].appendChild(text);
   }
+  else{
+    if(beats.length>boxNum){
+      for(var i = 0; i < chordProgressionsMajor[chordDeg].length; i++){
+        (function () {
+          var button = document.createElement('button');
+          chord = new Chord(chordProgressionsMajor[chordDeg][i], 0)
+          button.innerHTML = chord.chordText;
+          button.value = chord.chordDegree;
+          button.addEventListener('click', function(){
+            var text = document.createElement('h1');
+            text.innerHTML = button.innerHTML;
+            beats[boxNum].appendChild(text);
+            if(beats.length>boxNum+1){
+              while(beats[boxNum+1].firstChild){
+                beats[boxNum+1].removeChild(beats[boxNum+1].firstChild);
+              }
+              createChordButtons(beats, boxNum+1, button.value);
+            }
+          })
+          button.classList.add('button');
+          beats[boxNum].appendChild(button);
+        }())
+      }
+    }
+  }
+}
+
 </script>
 
 </html>
