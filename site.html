@@ -4,11 +4,11 @@
 <head>
   <meta charset="utf-8">
   <title>Composition Helper</title>
-  <script src='https://d3js.org/d3.v4.min.js'></script>
+  <script src='https://code.jquery.com/jquery-3.3.1.min.js'></script>
   <style>
   #chordDiv div{
     display: inline-block;
-    margin-left: 10px;
+    /*margin-left: 10px;*/
     border: 5px solid black;
     overflow: hidden;
     text-align: center;
@@ -23,7 +23,8 @@
     overflow: hidden;
     vertical-align: middle;
     margin-top: 2px;
-}
+  }
+
   </style>
 </head>
 
@@ -44,22 +45,28 @@
   Collect Info
   </button> </br>
 
-  <img id="timeImage" src="" style=""></img></br></br>
+  <h1 id="info">
+  </h1>
 
   <div id="chordDiv">
   </div>
 </body>
 
 <script>
-  // console.log(window.innerWidth)
+console.log(document.styleSheets[0]);
   var timeSignatureTop;
   var timeSignatureBottom;
   var key;
   var mode;
-  var chords;
-  var notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+  var flatsOrSharps;
+  var chords = [0];
+  var sharpNotes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+  var flatNotes = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
   var majorSteps = [ 0, 2, 4, 5, 7, 9, 11 ];
-  var minorSteps = [ 0, 2, 3, 5, 7, 8, 10 ]
+  var minorSteps = [ 0, 2, 3, 5, 7, 8, 10 ];
+
+  var majorChordModes = [" maj", " min", " min", " maj", " maj", " min", "dim"];
+  var minorChordModes = [" min", "dim", " maj", " min", " min", " maj", " maj"];
 
   var chordProgressionsMajor =
     [[4, 3, 6, 2, 0, 5],
@@ -85,10 +92,20 @@
 
     convertDegree(){
       if(mode == "major"){
-        return notes[(key + majorSteps[this.chordDegree]) % 12];
+        if(flatsOrSharps=="flat"){
+          return flatNotes[(key + majorSteps[this.chordDegree]) % 12] + majorChordModes[this.chordDegree];
+        }
+        else{
+          return sharpNotes[(key + majorSteps[this.chordDegree]) % 12] + majorChordModes[this.chordDegree];
+        }
       }
       else{
-        return notes[(key + minorSteps[this.chordDegree]) % 12];
+        if(flatsOrSharps=="flat"){
+          return flatNotes[(key + minorSteps[this.chordDegree]) % 12] + minorChordModes[this.chordDegree];
+        }
+        else{
+          return sharpNotes[(key + minorSteps[this.chordDegree]) % 12] + minorChordModes[this.chordDegree];
+        }
       }
     }
   }
@@ -107,10 +124,22 @@
     }
   }
 
+  function getKey(){
+    key = document.getElementById("key").value;
+    if( (key.charAt(1)== "b") || ((key.charAt(0)=="F") && key.charAt(1)!="#")){
+      flatsOrSharps = "flat";
+      key = flatNotes.indexOf(key);
+    }
+    else{
+      flatsOrSharps = "sharp";
+      key = sharpNotes.indexOf(key);
+    }
+  }
+
   function  getInfo(){
     timeSignatureTop = parseInt(document.getElementById('timeTop').value);
     timeSignatureBottom = parseInt(document.getElementById('timeBottom').value);
-    key = parseInt(document.getElementById("key").value);
+    getKey();
 
     if( document.getElementById("major").checked == true ){
       mode = "major";
@@ -121,16 +150,18 @@
       mode = "other";
     }
 
-    if(timeSignatureTop==4 && timeSignatureBottom==4){
-      document.getElementById("timeImage").src = "http://jonathankulp.org/images/4-4meter-original.png";
-      document.getElementById("timeImage").style = "width:30px;height:75px;";
-    }
+    var info = document.getElementById("info");
+    info.innerHTML = "Key: " + document.getElementById("key").value + " " + mode
+    + ", Time Signature: " + timeSignatureTop + "/" + timeSignatureBottom;
+
     var box = document.getElementById("chordDiv");
     while(box.firstChild){
       box.removeChild(box.firstChild);
     }
     for(var i=0; i < timeSignatureTop; i++){
       var addedDiv = document.createElement('div')
+      addedDiv.style.marginLeft = window.innerWidth / 90;
+      addedDiv.style.marginRight = "4px";
       box.appendChild(addedDiv);
     }
 
@@ -154,7 +185,7 @@ function createChordButtons(beats, boxNum, chordDeg){
   if(boxNum === 0){
     chord = new Chord(0,0);
     var text = document.createElement('h1');
-    text.innerHTML = chord.chordText;
+    text.innerHTML = chord.chordText + " / " + chord.convertDegree();
     beats[boxNum].appendChild(text);
   }
   else{
@@ -163,18 +194,45 @@ function createChordButtons(beats, boxNum, chordDeg){
         (function () {
           var button = document.createElement('button');
           chord = new Chord(chordProgressionsMajor[chordDeg][i], 0)
+          $(button).data("chord", chord);
           button.innerHTML = chord.chordText;
           button.value = chord.chordDegree;
+          button.id = "button" + i;
           button.addEventListener('click', function(){
-            var text = document.createElement('h1');
-            text.innerHTML = button.innerHTML;
-            beats[boxNum].appendChild(text);
-            if(beats.length>boxNum+1){
-              while(beats[boxNum+1].firstChild){
-                beats[boxNum+1].removeChild(beats[boxNum+1].firstChild);
-              }
-              createChordButtons(beats, boxNum+1, button.value);
+            var chord = $(this).data("chord");
+            if(document.getElementById("text" + boxNum)){
+              document.getElementById("text" + boxNum).innerHTML = button.innerHTML + " / " + chord.convertDegree();
             }
+            else{
+              var text = document.createElement("h1");
+              text.innerHTML = button.innerHTML + " / " + chord.convertDegree();
+              text.id = "text" + boxNum;
+              beats[boxNum].appendChild(text);
+            }
+            if(boxNum+1==beats.length){
+              console.log("hello");
+              for(var i=0; i < timeSignatureTop; i++){
+                var addedDiv = document.createElement('div')
+                addedDiv.style.marginLeft = window.innerWidth / 90;
+                addedDiv.style.marginRight = "4px";
+                document.getElementById("chordDiv").appendChild(addedDiv);
+              }
+              console.log(document.getElementById("chordDiv"));
+
+              beats = document.querySelectorAll("#chordDiv div");
+              for(var i = 0; i < beats.length; i++){
+                var sideLength = (Math.floor((window.innerWidth-(timeSignatureTop+1)*20) / timeSignatureTop)).toString() + "px"
+                beats[i].style.width = sideLength;
+                beats[i].style.height = sideLength;
+                if(i != 0){
+                  beats[i].classList.add('selections')
+                }
+              }
+            }
+            while(beats[boxNum+1].firstChild){
+              beats[boxNum+1].removeChild(beats[boxNum+1].firstChild);
+            }
+            createChordButtons(beats, boxNum+1, button.value);
           })
           button.classList.add('button');
           beats[boxNum].appendChild(button);
